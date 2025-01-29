@@ -39,7 +39,7 @@ async function generateFileListHTML(directoryPath) {
             listItems.push(`last edited <em>${fileInfo.timestamp}</em>`);
             listItems.push('<br>');
             listItems.push(`${fileInfo.fileSize}b`);
-            listItems.push<('</li>');
+            listItems.push('</li>');
         }
 
         listItems.push('</ul>');
