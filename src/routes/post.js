@@ -21,6 +21,10 @@ router.get("/:slug", async (req, res) => {
 	}
 
 	const post = await parsePost(filePath);
+	if (post === false) {
+		return res.status(500).send("500 internal server error");
+	}
+
 	const html = md.render(post.content);
 
 	res.render("post", {
@@ -40,29 +44,31 @@ async function parsePost(filePath) {
 		return false;
 	}
 
-	const [metaBlock, content] = raw.split(/\r?\n\r?\n/, 2);
+	const match = raw.match(/\r?\n\r?\n/);
+	let metaBlock = "";
+	let content = raw;
+
+	if (match) {
+		metaBlock = raw.slice(0, match.index);
+		content = raw.slice(match.index + match[0].length);
+	} else {
+        return raw;
+    }
+
 	const metadata = {};
-
-	if (!content) {
-		return {
-			metadata: {},
-			content: raw,
-		};
-	}
-
 	metaBlock.split(/\r?\n/).forEach((line) => {
 		const [key, ...rest] = line.split(":");
 		if (key && rest.length) {
-			let val = rest.join(":").trim();
+			let value = rest.join(":").trim();
 
 			if (key.trim().toLowerCase() === "tags") {
-				val = val
+				value = value
 					.split(",")
 					.map((tag) => tag.trim())
-					.filter((tag) => tag.length > 0);
+					.filter(Boolean);
 			}
 
-			metadata[key.trim()] = val;
+			metadata[key.trim()] = value;
 		}
 	});
 
