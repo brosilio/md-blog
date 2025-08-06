@@ -25,12 +25,12 @@ router.get("/:slug", async (req, res) => {
 		return res.status(500).send("500 internal server error");
 	}
 
-	const html = md.render(post.content);
+	const html = md.render(post.content ? post.content : post);
 
 	res.render("post", {
 		blogName,
 		slug: slug,
-		title: post.metadata.title,
+		title: post.metadata?.title || slug,
 		content: html,
 	});
 });
