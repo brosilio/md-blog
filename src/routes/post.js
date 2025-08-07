@@ -52,8 +52,8 @@ async function parsePost(filePath) {
 		metaBlock = raw.slice(0, match.index);
 		content = raw.slice(match.index + match[0].length);
 	} else {
-        return raw;
-    }
+		return raw;
+	}
 
 	const metadata = {};
 	metaBlock.split(/\r?\n/).forEach((line) => {
@@ -71,6 +71,13 @@ async function parsePost(filePath) {
 			metadata[key.trim()] = value;
 		}
 	});
+
+	if (metadata.draft === "yes") {
+		return {
+			metadata,
+			content: "This post is marked as a draft and is not yet available",
+		};
+	}
 
 	return {
 		metadata,
