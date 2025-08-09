@@ -1,6 +1,8 @@
 require("dotenv").config();
 const postDirectory = process.env.POST_DIRECTORY;
 
+const MarkdownIt = require("markdown-it");
+const md = new MarkdownIt();
 const fs = require("fs/promises");
 const path = require("path");
 const chokidar = require("chokidar");
@@ -74,6 +76,7 @@ async function GetPostBySlug(slug) {
 	}
 
 	let post = await getPostFromFile(slug);
+	post.content = md.render(post.content);
 	postCache.set(slug, post);
 
 	return post;
