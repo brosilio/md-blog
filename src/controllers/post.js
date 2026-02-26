@@ -18,10 +18,9 @@ chokidar
 		postCache.delete(slug);
 	});
 
-async function getPostFromFile(slug) {
+async function parsePostFile(slug) {
 	const filePath = path.join(postDirectory, `${slug}.md`);
-
-	let raw = null;
+	let raw;
 	try {
 		raw = await fs.readFile(filePath, "utf-8");
 	} catch (error) {
@@ -30,62 +29,46 @@ async function getPostFromFile(slug) {
 	}
 
 	const match = raw.match(/\r?\n\r?\n/);
-	let metaBlock = "";
-	let content = raw;
+	if (!match) return { metadata: {}, content: raw };
 
-	if (match) {
-		metaBlock = raw.slice(0, match.index);
-		content = raw.slice(match.index + match[0].length);
-	} else {
-		return raw;
-	}
+	const metaBlock = raw.slice(0, match.index);
+	const content = raw.slice(match.index + match[0].length);
 
 	const metadata = {};
 	metaBlock.split(/\r?\n/).forEach((line) => {
 		const [key, ...rest] = line.split(":");
 		if (key && rest.length) {
 			let value = rest.join(":").trim();
-
 			if (key.trim().toLowerCase() === "tags") {
 				value = value
 					.split(",")
 					.map((tag) => tag.trim())
 					.filter(Boolean);
 			}
-
 			metadata[key.trim()] = value;
 		}
 	});
 
-	if (metadata.draft === "yes") {
-		return {
-			metadata,
-			content: "This post is marked as a draft and is not yet available",
-		};
-	}
-
-	return {
-		metadata,
-		content,
-	};
+	return { metadata, content };
 }
 
-async function GetPostBySlug(slug) {
-	if (postCache.has(slug)) {
-		return postCache.get(slug);
-	}
+async function GetPostBySlug(slug, raw = false) {
+	if (raw) return parsePostFile(slug);
 
-	let post = await getPostFromFile(slug);
+	if (postCache.has(slug)) return postCache.get(slug);
 
-	if (typeof post === "string") {
+	const post = await parsePostFile(slug);
+	if (!post) return false;
+
+	if (post.metadata?.draft === "yes") {
 		return {
-			content: post,
+			metadata: post.metadata,
+			content: "This post is marked as a draft and is not yet available",
 		};
 	}
 
 	post.content = md.render(post.content);
 	postCache.set(slug, post);
-
 	return post;
 }
 
