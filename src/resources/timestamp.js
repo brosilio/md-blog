@@ -1,4 +1,3 @@
-require("dotenv").config();
 const TIME_LOCALE = process.env.TIME_LOCALE || "en-US";
 const timeFormat = {
 	weekday: "long",
@@ -10,14 +9,13 @@ const timeFormat = {
 function FormatFileTime(timestamp) {
 	if (!timestamp) return "(no date)";
 
-	timestamp = new Date(timestamp);
+	const date = new Date(timestamp);
+	const baseDate = date.toLocaleDateString(TIME_LOCALE, timeFormat);
 
-	let baseDate = timestamp.toLocaleDateString(TIME_LOCALE, timeFormat);
+	const hour24 = date.getHours();
+	const minutes = date.getMinutes();
 
-	const hour24 = timestamp.getHours();
-	const minutes = timestamp.getMinutes();
-
-	let hour = hour24 % 12 || 12;
+	const hour = hour24 % 12 || 12;
 	const isPM = hour24 >= 12;
 	const suffix = isPM ? "pm" : "am";
 

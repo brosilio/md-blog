@@ -6,7 +6,7 @@
 <body>
   <header>
     <%- include('header') %>
-    <h2><% if (isNew) { %>new post<% } else { %><a href="/">/post</a>/<%- slug %> &mdash; edit<% } %></h2>
+    <h2><% if (isNew) { %>new post<% } else { %><a href="/">/post</a>/<%= slug %> &mdash; edit<% } %></h2>
     <hr>
   </header>
   <main>
