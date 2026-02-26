@@ -23,6 +23,7 @@ async function getPostList(directoryPath) {
 				posts.push({
 					slug: file.slice(0, -3),
 					ts: timestamp.FormatFileTime(stats.mtime),
+					mtime: stats.mtime,
 				});
 			} catch {
 				// skip unreadable files
@@ -39,10 +40,20 @@ async function getPostList(directoryPath) {
 }
 
 const POSTS_PER_PAGE = 10;
+const SORT_OPTIONS = ["latest", "oldest", "alpha", "random"];
 
 router.get("/", async (req, res) => {
 	const allPosts = await getPostList(process.env.POST_DIRECTORY);
 	const user = getAuthUser(req);
+
+	const sort = SORT_OPTIONS.includes(req.query.sort) ? req.query.sort : "latest";
+
+	if (allPosts) {
+		if (sort === "latest") allPosts.sort((a, b) => b.mtime - a.mtime);
+		else if (sort === "oldest") allPosts.sort((a, b) => a.mtime - b.mtime);
+		else if (sort === "alpha") allPosts.sort((a, b) => a.slug.localeCompare(b.slug));
+		else if (sort === "random") allPosts.sort(() => Math.random() - 0.5);
+	}
 
 	const totalPages = allPosts ? Math.max(1, Math.ceil(allPosts.length / POSTS_PER_PAGE)) : 1;
 	const page = Math.min(Math.max(1, parseInt(req.query.page) || 1), totalPages);
@@ -58,6 +69,7 @@ router.get("/", async (req, res) => {
 		username: user?.username || null,
 		page,
 		totalPages,
+		sort,
 	});
 });
 

@@ -125,6 +125,13 @@ button:hover {
 	color: #444;
 }
 
+.sort-controls {
+	display: flex;
+	gap: 1em;
+	margin-bottom: 0.5em;
+	color: #666;
+}
+
 .upload-success {
 	color: #55aa55;
 }

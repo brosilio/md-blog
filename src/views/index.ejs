@@ -17,6 +17,12 @@
     <hr>
   </header>
   <main>
+    <div class="sort-controls">
+      sort:
+      <% [["latest","latest"],["oldest","oldest"],["alpha","alphabetical"],["random","random"]].forEach(([val,label]) => { %>
+        <% if (sort === val) { %><span class="pagination-current"><%= label %></span><% } else { %><a href="/?sort=<%= val %>"><%= label %></a><% } %>
+      <% }) %>
+    </div>
     <%- include('pagination') %>
     <% if (posts === null) { %>
       <p>Error loading posts.</p>
