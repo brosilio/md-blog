@@ -13,4 +13,12 @@ function requireAuth(req, res, next) {
 	}
 }
 
-module.exports = { requireAuth };
+function getAuthUser(req) {
+	try {
+		return jwt.verify(req.cookies?.token, process.env.JWT_SECRET);
+	} catch {
+		return null;
+	}
+}
+
+module.exports = { requireAuth, getAuthUser };

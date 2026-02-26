@@ -1,4 +1,3 @@
-require("dotenv").config();
 const postDirectory = process.env.POST_DIRECTORY;
 
 const MarkdownIt = require("markdown-it");

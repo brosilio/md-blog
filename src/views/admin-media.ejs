@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('head') %>
+  </head>
+<body>
+  <header>
+    <%- include('header') %>
+    <h2>/admin/media</h2>
+    <nav>
+      <span><%= username %></span>
+      &mdash; <a href="/">home</a>
+      &mdash; <a href="/admin/post/new">new post</a>
+      &mdash; <a href="/admin/media">media</a>
+      &mdash; <a href="/logout">logout</a>
+    </nav>
+    <hr>
+  </header>
+  <main>
+    <% if (error) { %>
+      <p class="form-error"><%= error %></p>
+    <% } %>
+    <% if (uploaded) { %>
+      <p class="upload-success">uploaded &mdash; url: <code><%= uploaded.url %></code></p>
+    <% } %>
+
+    <form method="POST" action="/admin/media/upload" enctype="multipart/form-data">
+      <label for="file">upload file</label><br>
+      <input type="file" id="file" name="file" accept="image/*,video/*,audio/*,.pdf" required><br><br>
+      <button type="submit">upload</button>
+    </form>
+
+    <hr>
+
+    <% if (files === null) { %>
+      <p>Could not read media directory. Set <code>MEDIA_DIRECTORY</code> in .env.</p>
+    <% } else if (files.length === 0) { %>
+      <p>no files yet.</p>
+    <% } else { %>
+      <ul class="media-list">
+        <% for (const file of files) { %>
+          <li class="media-item">
+            <% if (file.isImage) { %>
+              <img src="<%= file.url %>" alt="" class="media-thumb">
+            <% } else { %>
+              <div class="media-icon">[<%= file.ext %>]</div>
+            <% } %>
+            <div class="media-info">
+              <strong><%= file.name %></strong><br>
+              <input type="text" readonly value="<%= file.url %>" onclick="this.select()" title="URL"><br>
+              <% if (file.isImage) { %>
+                <input type="text" readonly value="![<%= file.name %>](<%= file.url %>)" onclick="this.select()" title="Markdown"><br>
+              <% } %>
+              <form method="POST" action="/admin/media/delete/<%= encodeURIComponent(file.name) %>">
+                <button type="submit" class="btn-danger" onclick="return confirm('Delete <%= file.name %>?')">delete</button>
+              </form>
+            </div>
+          </li>
+        <% } %>
+      </ul>
+    <% } %>
+  </main>
+</body>
+</html>

@@ -8,6 +8,7 @@ const indexRouter = require("./routes/index");
 const postRouter = require("./routes/post");
 const loginRouter = require("./routes/login");
 const adminRouter = require("./routes/admin");
+const mediaRouter = require("./routes/media");
 
 const app = express();
 const PORT = process.env.APP_PORT || 3000;
@@ -17,11 +18,15 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 app.use(express.static("public"));
+if (process.env.MEDIA_DIRECTORY) {
+	app.use("/media", express.static(process.env.MEDIA_DIRECTORY));
+}
 app.use(cookieParser());
 
 app.use("/", indexRouter);
 app.use("/", loginRouter);
 app.use("/admin", adminRouter);
+app.use("/admin", mediaRouter);
 app.use("/post", postRouter);
 
 app.listen(PORT, HOST, () => {

@@ -1,11 +1,10 @@
-require("dotenv").config();
 const blogName = process.env.BLOG_NAME;
 const footerContent = process.env.FOOTER_CONTENT;
 
 const fs = require("fs/promises");
 const path = require("path");
-const jwt = require("jsonwebtoken");
 const timestamp = require("../resources/timestamp");
+const { getAuthUser } = require("../middleware/auth");
 
 const express = require("express");
 const router = express.Router();
@@ -35,14 +34,6 @@ async function getPostList(directoryPath) {
 			`Error reading directory ${directoryPath}:`,
 			error.message
 		);
-		return null;
-	}
-}
-
-function getAuthUser(req) {
-	try {
-		return jwt.verify(req.cookies?.token, process.env.JWT_SECRET);
-	} catch {
 		return null;
 	}
 }

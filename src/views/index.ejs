@@ -6,13 +6,14 @@
 <body>
   <header>
     <%- include('header') %>
+    <% if (username) { %>
     <nav>
-      <% if (username) { %>
-        <span><%= username %></span>
-        &mdash; <a href="/logout">logout</a>
-        &mdash; <a href="/admin/post/new">new post</a>
-      <% } %>
+      <span><%= username %></span>
+      &mdash; <a href="/logout">logout</a>
+      &mdash; <a href="/admin/post/new">new post</a>
+      &mdash; <a href="/admin/media">media</a>
     </nav>
+    <% } %>
     <hr>
   </header>
   <main>
