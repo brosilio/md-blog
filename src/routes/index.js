@@ -38,9 +38,17 @@ async function getPostList(directoryPath) {
 	}
 }
 
+const POSTS_PER_PAGE = 10;
+
 router.get("/", async (req, res) => {
-	const posts = await getPostList(process.env.POST_DIRECTORY);
+	const allPosts = await getPostList(process.env.POST_DIRECTORY);
 	const user = getAuthUser(req);
+
+	const totalPages = allPosts ? Math.max(1, Math.ceil(allPosts.length / POSTS_PER_PAGE)) : 1;
+	const page = Math.min(Math.max(1, parseInt(req.query.page) || 1), totalPages);
+	const posts = allPosts
+		? allPosts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE)
+		: null;
 
 	res.render("index", {
 		blogName,
@@ -48,6 +56,8 @@ router.get("/", async (req, res) => {
 		title: "Home",
 		posts,
 		username: user?.username || null,
+		page,
+		totalPages,
 	});
 });
 

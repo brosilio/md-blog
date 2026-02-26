@@ -108,6 +108,23 @@ button:hover {
 	color: #cc4444;
 }
 
+.pagination {
+	display: flex;
+	gap: 1em;
+	align-items: center;
+	margin: 1em 0;
+	flex-wrap: wrap;
+}
+
+.pagination-current {
+	color: #cccccc;
+	text-decoration: underline;
+}
+
+.pagination-disabled {
+	color: #444;
+}
+
 .upload-success {
 	color: #55aa55;
 }

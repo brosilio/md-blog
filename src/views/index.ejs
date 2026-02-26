@@ -17,6 +17,7 @@
     <hr>
   </header>
   <main>
+    <%- include('pagination') %>
     <% if (posts === null) { %>
       <p>Error loading posts.</p>
     <% } else if (posts.length === 0) { %>
@@ -31,6 +32,7 @@
         <% } %>
       </ul>
     <% } %>
+    <%- include('pagination') %>
   </main>
   <footer>
     <%- footer %>

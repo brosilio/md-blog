@@ -1,0 +1,9 @@
+<% if (totalPages > 1) { %>
+<nav class="pagination">
+  <% if (page > 1) { %><a href="/?page=<%= page - 1 %>">&larr; prev</a><% } else { %><span class="pagination-disabled">&larr; prev</span><% } %>
+  <% for (let p = 1; p <= totalPages; p++) { %>
+    <% if (p === page) { %><span class="pagination-current"><%= p %></span><% } else { %><a href="/?page=<%= p %>"><%= p %></a><% } %>
+  <% } %>
+  <% if (page < totalPages) { %><a href="/?page=<%= page + 1 %>">next &rarr;</a><% } else { %><span class="pagination-disabled">next &rarr;</span><% } %>
+</nav>
+<% } %>
