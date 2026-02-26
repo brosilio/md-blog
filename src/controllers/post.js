@@ -71,6 +71,76 @@ async function GetPostBySlug(slug, raw = false) {
 	return post;
 }
 
+const KNOWN_KEYS = new Set(["title", "tags", "draft"]);
+
+function extractFields(metadata) {
+	const extraLines = Object.entries(metadata)
+		.filter(([k]) => !KNOWN_KEYS.has(k.toLowerCase()))
+		.map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
+		.join("\n");
+
+	return {
+		postTitle: metadata.title || "",
+		tags: Array.isArray(metadata.tags)
+			? metadata.tags.join(", ")
+			: metadata.tags || "",
+		draft: metadata.draft === "yes",
+		extraMeta: extraLines,
+	};
+}
+
+function buildRawPost({ postTitle, tags, draft, extraMeta, content }) {
+	const lines = [];
+	if (postTitle && postTitle.trim()) lines.push(`title: ${postTitle.trim()}`);
+	if (tags && tags.trim()) lines.push(`tags: ${tags.trim()}`);
+	if (draft) lines.push(`draft: yes`);
+	if (extraMeta && extraMeta.trim()) {
+		extraMeta
+			.trim()
+			.split(/\r?\n/)
+			.forEach((line) => {
+				if (line.trim()) lines.push(line.trim());
+			});
+	}
+	if (lines.length > 0) return lines.join("\n") + "\n\n" + (content || "");
+	return content || "";
+}
+
+async function postExists(slug) {
+	try {
+		await fs.access(path.join(postDirectory, `${slug}.md`));
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+async function writePost(slug, rawContent) {
+	await fs.writeFile(
+		path.join(postDirectory, `${slug}.md`),
+		rawContent,
+		"utf-8"
+	);
+}
+
+async function createPost(slug, fields) {
+	if (await postExists(slug)) {
+		return { error: `A post with slug "${slug}" already exists.` };
+	}
+	await writePost(slug, buildRawPost(fields));
+	return { error: null };
+}
+
+async function updatePost(slug, fields) {
+	if (!(await postExists(slug))) return false;
+	await writePost(slug, buildRawPost(fields));
+	return true;
+}
+
 module.exports = {
 	GetPostBySlug,
+	extractFields,
+	buildRawPost,
+	createPost,
+	updatePost,
 };
