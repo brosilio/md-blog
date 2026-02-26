@@ -4,71 +4,59 @@ const footerContent = process.env.FOOTER_CONTENT;
 
 const fs = require("fs/promises");
 const path = require("path");
+const jwt = require("jsonwebtoken");
 const timestamp = require("../resources/timestamp");
 
 const express = require("express");
 const router = express.Router();
 
-async function getFileInfo(filePath) {
+async function getPostList(directoryPath) {
 	try {
-		const stats = await fs.stat(filePath);
-		return {
-			fileSize: stats.size,
-			timestamp: stats.mtime,
-		};
+		const files = (await fs.readdir(directoryPath)).filter((x) =>
+			x.endsWith(".md")
+		);
+
+		const posts = [];
+		for (const file of files) {
+			const filePath = path.join(directoryPath, file);
+			try {
+				const stats = await fs.stat(filePath);
+				posts.push({
+					slug: file.slice(0, -3),
+					ts: timestamp.FormatFileTime(stats.mtime),
+				});
+			} catch {
+				// skip unreadable files
+			}
+		}
+		return posts;
 	} catch (error) {
 		console.error(
-			`Error getting file info for ${filePath}:`,
+			`Error reading directory ${directoryPath}:`,
 			error.message
 		);
 		return null;
 	}
 }
 
-async function generateFileListHTML(directoryPath) {
+function getAuthUser(req) {
 	try {
-		const files = (await fs.readdir(directoryPath)).filter((x) =>
-			x.endsWith(".md")
-		);
-		if (files.length === 0) return "<p>No files found.</p>";
-
-		const listItems = [];
-		listItems.push("<ul>");
-
-		for (const file of files) {
-			const filePath = path.join(directoryPath, file);
-			const fileInfo = await getFileInfo(filePath);
-			const postName = file.substring(0, file.indexOf("."));
-			const ts = timestamp.FormatFileTime(fileInfo.timestamp);
-
-			listItems.push("<li>");
-			listItems.push(
-				`<h3><a href="/post/${postName}">&quot;${postName}&quot;</a></h3>`
-			);
-			listItems.push(`modified <em>${ts}</em>`);
-			listItems.push("</li>");
-		}
-
-		listItems.push("</ul>");
-
-		return listItems.join("");
-	} catch (error) {
-		console.error(
-			`Error reading directory ${directoryPath}:`,
-			error.message
-		);
-		return "<p>Error loading file list.</p>";
+		return jwt.verify(req.cookies?.token, process.env.JWT_SECRET);
+	} catch {
+		return null;
 	}
 }
 
 router.get("/", async (req, res) => {
-	const postList = await generateFileListHTML(process.env.POST_DIRECTORY);
+	const posts = await getPostList(process.env.POST_DIRECTORY);
+	const user = getAuthUser(req);
 
 	res.render("index", {
 		blogName,
 		footer: footerContent,
 		title: "Home",
-		content: postList,
+		posts,
+		username: user?.username || null,
 	});
 });
 

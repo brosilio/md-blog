@@ -76,6 +76,13 @@ async function GetPostBySlug(slug) {
 	}
 
 	let post = await getPostFromFile(slug);
+
+	if (typeof post === "string") {
+		return {
+			content: post,
+		};
+	}
+
 	post.content = md.render(post.content);
 	postCache.set(slug, post);
 

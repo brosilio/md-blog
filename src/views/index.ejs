@@ -6,9 +6,30 @@
 <body>
   <header>
     <%- include('header') %>
+    <nav>
+      <% if (username) { %>
+        <span><%= username %></span>
+        &mdash; <a href="/logout">logout</a>
+        &mdash; <a href="/admin/post/new">new post</a>
+      <% } %>
+    </nav>
+    <hr>
   </header>
   <main>
-    <%- content %>
+    <% if (posts === null) { %>
+      <p>Error loading posts.</p>
+    <% } else if (posts.length === 0) { %>
+      <p>No posts yet.</p>
+    <% } else { %>
+      <ul>
+        <% for (const post of posts) { %>
+          <li>
+            <h3><a href="/post/<%= post.slug %>">&quot;<%= post.slug %>&quot;</a><% if (username) { %> &mdash; <a href="/admin/post/<%= post.slug %>/edit">edit</a><% } %></h3>
+            modified <em><%= post.ts %></em>
+          </li>
+        <% } %>
+      </ul>
+    <% } %>
   </main>
   <footer>
     <%- footer %>

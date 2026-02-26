@@ -6,7 +6,7 @@
 <body>
   <header>
     <%- include('header') %>
-    <h2><a href="/">/post</a>/<%- slug %></h2>
+    <h2><a href="/">/post</a>/<%- slug %><% if (username) { %> &mdash; <a href="/admin/post/<%= slug %>/edit">edit</a><% } %></h2>
     <h3><%- title %></h3>
     <hr>
   </header>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('head') %>
+  </head>
+<body>
+  <header>
+    <%- include('header') %>
+    <h2>login</h2>
+    <hr>
+  </header>
+  <main>
+    <% if (error) { %>
+      <p class="form-error"><%= error %></p>
+    <% } %>
+    <form method="POST" action="/login">
+      <label for="username">username</label><br>
+      <input type="text" id="username" name="username" autocomplete="username"><br><br>
+      <label for="password">password</label><br>
+      <input type="password" id="password" name="password" autocomplete="current-password"><br><br>
+      <button type="submit">login</button>
+    </form>
+  </main>
+</body>
+</html>
