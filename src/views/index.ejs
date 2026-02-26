@@ -17,6 +17,15 @@
     <hr>
   </header>
   <main>
+    <% if (allTags.length > 0) { %>
+    <div class="sort-controls">
+      tag:
+      <% if (!tag) { %><span class="pagination-current">all</span><% } else { %><a href="/?sort=<%= sort %>">all</a><% } %>
+      <% for (const t of allTags) { %>
+        <% if (t === tag) { %><span class="pagination-current"><%= t %></span><% } else { %><a href="/?sort=<%= sort %>&tag=<%= encodeURIComponent(t) %>"><%= t %></a><% } %>
+      <% } %>
+    </div>
+    <% } %>
     <div class="sort-controls">
       sort:
       <% [["latest","latest"],["oldest","oldest"],["alpha","alphabetical"],["random","random"]].forEach(([val,label]) => { %>

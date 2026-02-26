@@ -1,75 +1,62 @@
 const blogName = process.env.BLOG_NAME;
 const footerContent = process.env.FOOTER_CONTENT;
 
-const fs = require("fs/promises");
-const path = require("path");
 const timestamp = require("../resources/timestamp");
 const { getAuthUser } = require("../middleware/auth");
+const { getAllPostsMeta } = require("../controllers/post");
 
 const express = require("express");
 const router = express.Router();
-
-async function getPostList(directoryPath) {
-	try {
-		const files = (await fs.readdir(directoryPath)).filter((x) =>
-			x.endsWith(".md")
-		);
-
-		const posts = [];
-		for (const file of files) {
-			const filePath = path.join(directoryPath, file);
-			try {
-				const stats = await fs.stat(filePath);
-				posts.push({
-					slug: file.slice(0, -3),
-					ts: timestamp.FormatFileTime(stats.mtime),
-					mtime: stats.mtime,
-				});
-			} catch {
-				// skip unreadable files
-			}
-		}
-		return posts;
-	} catch (error) {
-		console.error(
-			`Error reading directory ${directoryPath}:`,
-			error.message
-		);
-		return null;
-	}
-}
 
 const POSTS_PER_PAGE = 10;
 const SORT_OPTIONS = ["latest", "oldest", "alpha", "random"];
 
 router.get("/", async (req, res) => {
-	const allPosts = await getPostList(process.env.POST_DIRECTORY);
+	const allPosts = await getAllPostsMeta();
 	const user = getAuthUser(req);
 
+	// Collect all tags before filtering so the full tag list is always shown
+	const allTags = allPosts
+		? [...new Set(allPosts.flatMap((p) => p.tags))].sort()
+		: [];
+
+	const tag = allTags.includes(req.query.tag) ? req.query.tag : null;
 	const sort = SORT_OPTIONS.includes(req.query.sort) ? req.query.sort : "latest";
 
-	if (allPosts) {
-		if (sort === "latest") allPosts.sort((a, b) => b.mtime - a.mtime);
-		else if (sort === "oldest") allPosts.sort((a, b) => a.mtime - b.mtime);
-		else if (sort === "alpha") allPosts.sort((a, b) => a.slug.localeCompare(b.slug));
-		else if (sort === "random") allPosts.sort(() => Math.random() - 0.5);
+	let posts = allPosts
+		? allPosts.filter((p) => !tag || p.tags.includes(tag))
+		: null;
+
+	if (posts) {
+		if (sort === "latest") posts.sort((a, b) => b.mtime - a.mtime);
+		else if (sort === "oldest") posts.sort((a, b) => a.mtime - b.mtime);
+		else if (sort === "alpha") posts.sort((a, b) => a.slug.localeCompare(b.slug));
+		else if (sort === "random") posts.sort(() => Math.random() - 0.5);
+
+		// Format timestamps for display after sorting (mtime no longer needed)
+		posts = posts.map((p) => ({
+			slug: p.slug,
+			ts: timestamp.FormatFileTime(p.mtime),
+		}));
 	}
 
-	const totalPages = allPosts ? Math.max(1, Math.ceil(allPosts.length / POSTS_PER_PAGE)) : 1;
+	const totalPages = posts ? Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE)) : 1;
 	const page = Math.min(Math.max(1, parseInt(req.query.page) || 1), totalPages);
-	const posts = allPosts
-		? allPosts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE)
+	const pagePosts = posts
+		? posts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE)
 		: null;
 
 	res.render("index", {
 		blogName,
 		footer: footerContent,
 		title: "Home",
-		posts,
+		posts: pagePosts,
 		username: user?.username || null,
 		page,
 		totalPages,
 		sort,
+		tag,
+		allTags,
 	});
 });
 

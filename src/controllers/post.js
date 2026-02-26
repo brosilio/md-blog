@@ -7,6 +7,7 @@ const path = require("path");
 const chokidar = require("chokidar");
 
 const postCache = new Map();
+const metaCache = new Map();
 chokidar
 	.watch(postDirectory, {
 		ignoreInitial: true,
@@ -15,6 +16,7 @@ chokidar
 	.on("all", (event, filename) => {
 		const slug = path.basename(filename).slice(0, -3);
 		postCache.delete(slug);
+		metaCache.delete(slug);
 	});
 
 async function parsePostFile(slug) {
@@ -137,8 +139,44 @@ async function updatePost(slug, fields) {
 	return true;
 }
 
+async function getAllPostsMeta() {
+	try {
+		const files = (await fs.readdir(postDirectory)).filter((f) =>
+			f.endsWith(".md")
+		);
+		const posts = await Promise.all(
+			files.map(async (file) => {
+				const slug = file.slice(0, -3);
+				try {
+					if (metaCache.has(slug)) return metaCache.get(slug);
+					const [stats, parsed] = await Promise.all([
+						fs.stat(path.join(postDirectory, file)),
+						parsePostFile(slug),
+					]);
+					const meta = {
+						slug,
+						mtime: stats.mtime,
+						tags: Array.isArray(parsed?.metadata?.tags)
+							? parsed.metadata.tags
+							: [],
+						title: parsed?.metadata?.title || slug,
+					};
+					metaCache.set(slug, meta);
+					return meta;
+				} catch {
+					return null;
+				}
+			})
+		);
+		return posts.filter(Boolean);
+	} catch {
+		return null;
+	}
+}
+
 module.exports = {
 	GetPostBySlug,
+	getAllPostsMeta,
 	extractFields,
 	buildRawPost,
 	createPost,
