@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('head') %>
+    <link rel="stylesheet" href="/codemirror/lib/codemirror.css">
+  </head>
+<body>
+  <header>
+    <%- include('header') %>
+    <h2>/admin/theme</h2>
+    <nav>
+      <span><%= username %></span>
+      &mdash; <a href="/">home</a>
+      &mdash; <a href="/admin/post/new">new post</a>
+      &mdash; <a href="/admin/media">media</a>
+      &mdash; <a href="/admin/trash">trash</a>
+      &mdash; <span class="pagination-current">theme</span>
+      &mdash; <a href="/logout">logout</a>
+    </nav>
+    <hr>
+  </header>
+  <main>
+    <% if (error) { %>
+      <p class="form-error"><%= error %></p>
+    <% } %>
+    <% if (saved) { %>
+      <p class="upload-success">saved.</p>
+    <% } %>
+    <form method="POST" action="/admin/theme">
+      <label for="css">custom css <span style="color:#666;">(loaded after styles.css — rules here override defaults)</span></label><br>
+      <textarea id="css" name="css" rows="30"><%= css %></textarea><br><br>
+      <button type="submit">save</button>
+    </form>
+  </main>
+  <script src="/codemirror/lib/codemirror.js"></script>
+  <script src="/codemirror/mode/css/css.js"></script>
+  <script>
+    CodeMirror.fromTextArea(document.getElementById('css'), {
+      mode: 'css',
+      theme: 'blog',
+      lineNumbers: true,
+      lineWrapping: true,
+    });
+  </script>
+</body>
+</html>

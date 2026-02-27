@@ -10,6 +10,7 @@ const loginRouter = require("./routes/login");
 const adminRouter = require("./routes/admin");
 const mediaRouter = require("./routes/media");
 const trashRouter = require("./routes/trash");
+const themeRouter = require("./routes/theme");
 
 const app = express();
 const PORT = process.env.APP_PORT || 3000;
@@ -28,11 +29,23 @@ if (process.env.MEDIA_DIRECTORY) {
 }
 app.use(cookieParser());
 
+app.get("/custom.css", async (req, res) => {
+	const file = process.env.CUSTOM_CSS_FILE;
+	if (!file) return res.type("css").send("");
+	try {
+		const css = await require("fs").promises.readFile(file, "utf-8");
+		res.type("css").send(css);
+	} catch {
+		res.type("css").send("");
+	}
+});
+
 app.use("/", indexRouter);
 app.use("/", loginRouter);
 app.use("/admin", adminRouter);
 app.use("/admin", mediaRouter);
 app.use("/admin", trashRouter);
+app.use("/admin", themeRouter);
 app.use("/post", postRouter);
 
 app.listen(PORT, HOST, () => {
