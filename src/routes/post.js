@@ -7,19 +7,19 @@ const router = express.Router();
 
 router.get("/:slug", async (req, res) => {
 	const { slug } = req.params;
+	const user = getAuthUser(req);
 
-	const post = await Post.GetPostBySlug(slug);
+	const post = await Post.GetPostBySlug(slug, false, !!user);
 	if (post === false) {
 		return res.status(404).send("404 post not found");
 	}
-
-	const user = getAuthUser(req);
 
 	res.render("post", {
 		blogName,
 		slug,
 		title: post.metadata?.title || slug,
 		content: post.content,
+		isDraft: post.metadata?.draft === "yes",
 		username: user?.username || null,
 	});
 });

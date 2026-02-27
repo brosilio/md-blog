@@ -42,6 +42,7 @@
       <textarea id="content" name="content" rows="25"><%= content %></textarea><br><br>
 
       <button type="submit"><% if (isNew) { %>create<% } else { %>save<% } %></button>
+      &nbsp;<button type="submit" name="action" value="preview" class="btn-secondary"><% if (isNew) { %>create<% } else { %>save<% } %> as draft &amp; preview</button>
       <% if (!isNew) { %>
         &nbsp;<a href="/post/<%= slug %>">cancel</a>
       <% } %>

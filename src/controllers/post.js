@@ -53,15 +53,15 @@ async function parsePostFile(slug) {
 	return { metadata, content };
 }
 
-async function GetPostBySlug(slug, raw = false) {
+async function GetPostBySlug(slug, raw = false, admin = false) {
 	if (raw) return parsePostFile(slug);
 
-	if (postCache.has(slug)) return postCache.get(slug);
+	if (!admin && postCache.has(slug)) return postCache.get(slug);
 
 	const post = await parsePostFile(slug);
 	if (!post) return false;
 
-	if (post.metadata?.draft === "yes") {
+	if (post.metadata?.draft === "yes" && !admin) {
 		return {
 			metadata: post.metadata,
 			content: "This post is marked as a draft and is not yet available",
@@ -69,7 +69,7 @@ async function GetPostBySlug(slug, raw = false) {
 	}
 
 	post.content = md.render(post.content);
-	postCache.set(slug, post);
+	if (!admin) postCache.set(slug, post);
 	return post;
 }
 

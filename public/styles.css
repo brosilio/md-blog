@@ -108,6 +108,29 @@ button:hover {
 	color: #cc4444;
 }
 
+.draft-banner {
+	color: #888;
+	border: 1px solid #444;
+	padding: 0.4em 0.8em;
+	margin-bottom: 1em;
+}
+
+.btn-secondary {
+	background: #111;
+	color: #888;
+	border: 1px solid #555;
+	padding: 0.4em 1.2em;
+	font-family: "Consolas", monospace;
+	font-size: 1em;
+	cursor: pointer;
+	border-radius: 3px;
+}
+
+.btn-secondary:hover {
+	background: #333;
+	color: #ccc;
+}
+
 .pagination {
 	display: flex;
 	gap: 1em;

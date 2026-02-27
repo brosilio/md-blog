@@ -27,7 +27,9 @@ router.get("/post/new", requireAuth, (req, res) => {
 });
 
 router.post("/post/new", requireAuth, parseBody, async (req, res) => {
-	const { slug, postTitle, tags, draft, extraMeta, content } = req.body;
+	const { slug, postTitle, tags, draft, extraMeta, content, action } =
+		req.body;
+	const forceDraft = action === "preview" || draft === "yes";
 
 	if (!slug || !SAFE_SLUG.test(slug)) {
 		return res.status(400).render("admin-editor", {
@@ -38,7 +40,7 @@ router.post("/post/new", requireAuth, parseBody, async (req, res) => {
 			error: "Slug must contain only lowercase letters, digits, and hyphens.",
 			postTitle: postTitle || "",
 			tags: tags || "",
-			draft: draft === "yes",
+			draft: forceDraft,
 			extraMeta: extraMeta || "",
 			content: content || "",
 		});
@@ -47,7 +49,7 @@ router.post("/post/new", requireAuth, parseBody, async (req, res) => {
 	const result = await Post.createPost(slug, {
 		postTitle,
 		tags,
-		draft: draft === "yes",
+		draft: forceDraft,
 		extraMeta,
 		content,
 	});
@@ -61,7 +63,7 @@ router.post("/post/new", requireAuth, parseBody, async (req, res) => {
 			error: result.error,
 			postTitle: postTitle || "",
 			tags: tags || "",
-			draft: draft === "yes",
+			draft: forceDraft,
 			extraMeta: extraMeta || "",
 			content: content || "",
 		});
@@ -92,11 +94,12 @@ router.post("/post/:slug/edit", requireAuth, parseBody, async (req, res) => {
 	const { slug } = req.params;
 	if (!SAFE_SLUG.test(slug)) return res.status(400).send("Invalid slug");
 
-	const { postTitle, tags, draft, extraMeta, content } = req.body;
+	const { postTitle, tags, draft, extraMeta, content, action } = req.body;
+	const forceDraft = action === "preview" || draft === "yes";
 	const saved = await Post.updatePost(slug, {
 		postTitle,
 		tags,
-		draft: draft === "yes",
+		draft: forceDraft,
 		extraMeta,
 		content,
 	});
