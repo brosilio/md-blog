@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <%- include('head') %>
+    <link rel="stylesheet" href="/codemirror/lib/codemirror.css">
   </head>
 <body>
   <header>
@@ -46,5 +47,14 @@
       <% } %>
     </form>
   </main>
+  <script src="/codemirror/lib/codemirror.js"></script>
+  <script src="/codemirror/mode/markdown/markdown.js"></script>
+  <script>
+    CodeMirror.fromTextArea(document.getElementById('content'), {
+      mode: 'markdown',
+      lineNumbers: true,
+      lineWrapping: true,
+    });
+  </script>
 </body>
 </html>

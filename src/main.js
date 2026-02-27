@@ -18,6 +18,10 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 app.use(express.static("public"));
+app.use(
+	"/codemirror",
+	express.static(path.join(__dirname, "..", "node_modules", "codemirror"))
+);
 if (process.env.MEDIA_DIRECTORY) {
 	app.use("/media", express.static(process.env.MEDIA_DIRECTORY));
 }
