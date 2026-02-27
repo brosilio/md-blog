@@ -21,6 +21,8 @@ router.get("/post/new", requireAuth, (req, res) => {
 		title: "New Post",
 		slug: "",
 		isNew: true,
+		isTrash: false,
+		formAction: "/admin/post/new",
 		error: null,
 		...emptyEditor,
 	});
@@ -37,6 +39,8 @@ router.post("/post/new", requireAuth, parseBody, async (req, res) => {
 			title: "New Post",
 			slug: slug || "",
 			isNew: true,
+			isTrash: false,
+			formAction: "/admin/post/new",
 			error: "Slug must contain only lowercase letters, digits, and hyphens.",
 			postTitle: postTitle || "",
 			tags: tags || "",
@@ -60,6 +64,8 @@ router.post("/post/new", requireAuth, parseBody, async (req, res) => {
 			title: "New Post",
 			slug,
 			isNew: true,
+			isTrash: false,
+			formAction: "/admin/post/new",
 			error: result.error,
 			postTitle: postTitle || "",
 			tags: tags || "",
@@ -84,6 +90,8 @@ router.get("/post/:slug/edit", requireAuth, async (req, res) => {
 		title: `Edit: ${slug}`,
 		slug,
 		isNew: false,
+		isTrash: false,
+		formAction: `/admin/post/${slug}/edit`,
 		error: null,
 		...Post.extractFields(post.metadata),
 		content: post.content,
@@ -106,6 +114,13 @@ router.post("/post/:slug/edit", requireAuth, parseBody, async (req, res) => {
 
 	if (!saved) return res.status(404).send("Post not found");
 	return res.redirect(`/post/${slug}`);
+});
+
+router.post("/post/:slug/delete", requireAuth, async (req, res) => {
+	const { slug } = req.params;
+	if (!SAFE_SLUG.test(slug)) return res.status(400).send("Invalid slug");
+	await Post.deletePost(slug);
+	return res.redirect("/admin/trash");
 });
 
 module.exports = router;

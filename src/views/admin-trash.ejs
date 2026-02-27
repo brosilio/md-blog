@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('head') %>
+  </head>
+<body>
+  <header>
+    <%- include('header') %>
+    <h2>/admin/trash</h2>
+    <nav>
+      <span><%= username %></span>
+      &mdash; <a href="/">home</a>
+      &mdash; <a href="/admin/post/new">new post</a>
+      &mdash; <a href="/admin/media">media</a>
+      &mdash; <span class="pagination-current">trash</span>
+      &mdash; <a href="/logout">logout</a>
+    </nav>
+    <hr>
+  </header>
+  <main>
+    <% if (error) { %>
+      <p class="form-error"><%= error %></p>
+    <% } else if (posts.length === 0) { %>
+      <p>trash is empty.</p>
+    <% } else { %>
+      <ul>
+        <% for (const post of posts) { %>
+          <li>
+            <h3>
+              <%= post.slug %>
+              <% if (post.title !== post.slug) { %>&mdash; <em><%= post.title %></em><% } %>
+            </h3>
+            <a href="/admin/trash/<%= post.slug %>/undelete">undelete</a>
+            &nbsp;&mdash;&nbsp;<a href="/admin/trash/<%= post.slug %>/edit">edit</a>
+            &nbsp;&mdash;&nbsp;<a href="/admin/trash/<%= post.slug %>/delete" class="link-danger" onclick="return confirm('Permanently delete \u201c<%= post.slug %>\u201d? This cannot be undone.')">delete forever</a>
+          </li>
+        <% } %>
+      </ul>
+    <% } %>
+  </main>
+</body>
+</html>

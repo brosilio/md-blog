@@ -14,7 +14,7 @@
     <% if (error) { %>
       <p class="form-error"><%= error %></p>
     <% } %>
-    <form method="POST" action="<% if (isNew) { %>/admin/post/new<% } else { %>/admin/post/<%= slug %>/edit<% } %>">
+    <form method="POST" action="<%= formAction %>">
 
       <% if (isNew) { %>
         <label for="slug">slug</label><br>
@@ -45,8 +45,11 @@
 
       <button type="submit"><% if (isNew) { %>create<% } else { %>save<% } %></button>
       &nbsp;<button type="submit" name="action" value="preview" class="btn-secondary"><% if (isNew) { %>create<% } else { %>save<% } %> as draft &amp; preview</button>
+      <% if (!isNew && !isTrash) { %>
+        &nbsp;<button type="submit" formaction="/admin/post/<%= slug %>/delete" class="btn-danger" onclick="return confirm('Move \u201c<%= slug %>\u201d to trash?')">delete</button>
+      <% } %>
       <% if (!isNew) { %>
-        &nbsp;<a href="/post/<%= slug %>">cancel</a>
+        &nbsp;<a href="<% if (isTrash) { %>/admin/trash<% } else { %>/post/<%= slug %><% } %>">cancel</a>
       <% } %>
     </form>
   </main>

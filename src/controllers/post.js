@@ -19,16 +19,7 @@ chokidar
 		metaCache.delete(slug);
 	});
 
-async function parsePostFile(slug) {
-	const filePath = path.join(postDirectory, `${slug}.md`);
-	let raw;
-	try {
-		raw = await fs.readFile(filePath, "utf-8");
-	} catch (error) {
-		console.log(`Error loading post: ${error.message}`);
-		return false;
-	}
-
+function parseRawContent(raw) {
 	const match = raw.match(/\r?\n\r?\n/);
 	if (!match) return { metadata: {}, content: raw };
 
@@ -51,6 +42,16 @@ async function parsePostFile(slug) {
 	});
 
 	return { metadata, content };
+}
+
+async function parsePostFile(slug) {
+	const filePath = path.join(postDirectory, `${slug}.md`);
+	try {
+		return parseRawContent(await fs.readFile(filePath, "utf-8"));
+	} catch (error) {
+		console.log(`Error loading post: ${error.message}`);
+		return false;
+	}
 }
 
 async function GetPostBySlug(slug, raw = false, admin = false) {
@@ -106,6 +107,90 @@ function buildRawPost({ postTitle, tags, draft, extraMeta, content }) {
 	}
 	if (lines.length > 0) return lines.join("\n") + "\n\n" + (content || "");
 	return content || "";
+}
+
+async function deletePost(slug) {
+	try {
+		await fs.rename(
+			path.join(postDirectory, `${slug}.md`),
+			path.join(postDirectory, `${slug}.md.deleted`)
+		);
+		postCache.delete(slug);
+		metaCache.delete(slug);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+async function undeletePost(slug) {
+	try {
+		await fs.rename(
+			path.join(postDirectory, `${slug}.md.deleted`),
+			path.join(postDirectory, `${slug}.md`)
+		);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+async function permanentlyDeletePost(slug) {
+	try {
+		await fs.unlink(path.join(postDirectory, `${slug}.md.deleted`));
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+async function getDeletedPosts() {
+	if (!postDirectory) return null;
+	try {
+		const files = (await fs.readdir(postDirectory)).filter((f) =>
+			f.endsWith(".md.deleted")
+		);
+		return await Promise.all(
+			files.map(async (f) => {
+				const slug = f.slice(0, -".md.deleted".length);
+				try {
+					const raw = await fs.readFile(
+						path.join(postDirectory, f),
+						"utf-8"
+					);
+					const { metadata } = parseRawContent(raw);
+					return { slug, title: metadata.title || slug };
+				} catch {
+					return { slug, title: slug };
+				}
+			})
+		);
+	} catch {
+		return null;
+	}
+}
+
+async function getDeletedPostRaw(slug) {
+	try {
+		const raw = await fs.readFile(
+			path.join(postDirectory, `${slug}.md.deleted`),
+			"utf-8"
+		);
+		return parseRawContent(raw);
+	} catch {
+		return false;
+	}
+}
+
+async function updateDeletedPost(slug, fields) {
+	const filePath = path.join(postDirectory, `${slug}.md.deleted`);
+	try {
+		await fs.access(filePath);
+	} catch {
+		return false;
+	}
+	await fs.writeFile(filePath, buildRawPost(fields), "utf-8");
+	return true;
 }
 
 async function postExists(slug) {
@@ -181,4 +266,10 @@ module.exports = {
 	buildRawPost,
 	createPost,
 	updatePost,
+	deletePost,
+	undeletePost,
+	permanentlyDeletePost,
+	getDeletedPosts,
+	getDeletedPostRaw,
+	updateDeletedPost,
 };

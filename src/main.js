@@ -9,6 +9,7 @@ const postRouter = require("./routes/post");
 const loginRouter = require("./routes/login");
 const adminRouter = require("./routes/admin");
 const mediaRouter = require("./routes/media");
+const trashRouter = require("./routes/trash");
 
 const app = express();
 const PORT = process.env.APP_PORT || 3000;
@@ -31,6 +32,7 @@ app.use("/", indexRouter);
 app.use("/", loginRouter);
 app.use("/admin", adminRouter);
 app.use("/admin", mediaRouter);
+app.use("/admin", trashRouter);
 app.use("/post", postRouter);
 
 app.listen(PORT, HOST, () => {
