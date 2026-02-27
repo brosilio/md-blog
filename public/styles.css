@@ -233,6 +233,17 @@ input[type="file"]::file-selector-button:hover {
 	min-width: 0;
 }
 
+.editor-font-ctrl {
+	font-size: 0.85em;
+	color: #555;
+	user-select: none;
+}
+
+.editor-font-ctrl:hover {
+	color: #55aa55;
+	text-decoration: none;
+}
+
 /* CodeMirror layout */
 .CodeMirror {
 	border: 1px solid #444;

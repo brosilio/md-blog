@@ -38,7 +38,9 @@
 
       <hr>
 
-      <label for="content">content</label><br>
+      <label for="content">content</label>
+      &nbsp;<a href="#" id="font-increase" class="editor-font-ctrl" title="increase font size">A+</a>
+      &nbsp;<a href="#" id="font-decrease" class="editor-font-ctrl" title="decrease font size">a-</a><br>
       <textarea id="content" name="content" rows="25"><%= content %></textarea><br><br>
 
       <button type="submit"><% if (isNew) { %>create<% } else { %>save<% } %></button>
@@ -51,11 +53,38 @@
   <script src="/codemirror/lib/codemirror.js"></script>
   <script src="/codemirror/mode/markdown/markdown.js"></script>
   <script>
-    CodeMirror.fromTextArea(document.getElementById('content'), {
+    const cm = CodeMirror.fromTextArea(document.getElementById('content'), {
       mode: 'markdown',
       theme: 'blog',
       lineNumbers: true,
       lineWrapping: true,
+    });
+
+    const FONT_STEP = 1;
+    const FONT_MIN = 8;
+    const FONT_MAX = 32;
+    const STORAGE_KEY = 'editor-font-size';
+
+    function setFontSize(px) {
+      px = Math.min(FONT_MAX, Math.max(FONT_MIN, px));
+      cm.getWrapperElement().style.fontSize = px + 'px';
+      cm.refresh();
+      localStorage.setItem(STORAGE_KEY, px);
+    }
+
+    const saved = parseInt(localStorage.getItem(STORAGE_KEY));
+    if (saved) setFontSize(saved);
+
+    document.getElementById('font-increase').addEventListener('click', (e) => {
+      e.preventDefault();
+      const current = parseInt(getComputedStyle(cm.getWrapperElement()).fontSize);
+      setFontSize(current + FONT_STEP);
+    });
+
+    document.getElementById('font-decrease').addEventListener('click', (e) => {
+      e.preventDefault();
+      const current = parseInt(getComputedStyle(cm.getWrapperElement()).fontSize);
+      setFontSize(current - FONT_STEP);
     });
   </script>
 </body>
