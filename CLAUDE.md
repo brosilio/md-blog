@@ -22,6 +22,7 @@ Copy `example.env` to `.env` before running. Key variables:
 - `CREDENTIALS_FILE` — absolute path to the admin credentials JSON file (managed by `npm run manage-account`)
 - `JWT_SECRET` — secret key for signing JWTs; set to a long random string
 - `MEDIA_DIRECTORY` — absolute path to the directory where uploaded media files are stored; served publicly at `/media/:filename`
+- `CUSTOM_CSS_FILE` — absolute path to a CSS file outside the repo; loaded after `styles.css` on every page so its rules override defaults; edited via `/admin/theme`
 
 ## Architecture
 
@@ -43,5 +44,7 @@ Express app with EJS templates, no database. Posts live as `.md` files on disk o
 **Admin routes** (`src/routes/admin.js`): `GET/POST /admin/post/new` and `GET/POST /admin/post/:slug/edit` — all protected by `requireAuth`. Slugs are validated against `/^[a-z0-9-]+$/` before any filesystem access. Post edits write directly to `POST_DIRECTORY`; the chokidar watcher in the post controller handles cache eviction automatically.
 
 **Media routes** (`src/routes/media.js`): `GET /admin/media`, `POST /admin/media/upload`, `POST /admin/media/delete/:filename` — all protected by `requireAuth`. Files are uploaded via multer to `MEDIA_DIRECTORY` with sanitized filenames (`/[^a-zA-Z0-9._-]/g` → `_`). Allowed types: images, mp4/webm, mp3/ogg/wav, pdf. 50MB limit. Files are served publicly at `/media/:filename` via `express.static`.
+
+**Theme routes** (`src/routes/theme.js`): `GET/POST /admin/theme` — protected by `requireAuth`. Reads and writes `CUSTOM_CSS_FILE`. The file is served at `GET /custom.css` (empty response if unset/missing) and loaded in `head.ejs` after `styles.css`, so its rules override the defaults without touching the repo.
 
 **`src/bin/manage-account.js`**: CLI utility to create or update the single admin account. Prompts for username and password, generates a fresh random salt, and writes the credentials JSON to `CREDENTIALS_FILE`.
