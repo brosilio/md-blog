@@ -67,6 +67,27 @@ img {
 	height: auto;
 }
 
+select {
+	background: #1a1a1a;
+	color: #cccccc;
+	border: 1px solid #444;
+	padding: 0.4em 0.6em;
+	font-family: "Consolas", monospace;
+	font-size: 1em;
+	border-radius: 3px;
+}
+
+select:focus {
+	outline: 1px solid #55aa55;
+	border-color: #55aa55;
+}
+
+input[type="range"] {
+	accent-color: #55aa55;
+	width: 16em;
+	cursor: pointer;
+}
+
 input[type="text"],
 input[type="password"],
 textarea {

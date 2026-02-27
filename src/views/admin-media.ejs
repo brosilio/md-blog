@@ -26,9 +26,42 @@
 
     <form method="POST" action="/admin/media/upload" enctype="multipart/form-data">
       <label for="file">upload file</label><br>
-      <input type="file" id="file" name="file" accept="image/*,video/*,audio/*,.pdf" required><br><br>
+      <input type="file" id="media-file" name="file" accept="image/*,video/*,audio/*,.pdf" required><br><br>
+      <div id="convert-row" style="display:none">
+        <label for="convert">format</label><br>
+        <select id="convert-select" name="convert">
+          <option value="leave">leave as-is</option>
+          <option value="jpg">convert to jpg</option>
+        </select><br><br>
+        <div id="quality-row" style="display:none">
+          <label for="quality">quality: <span id="quality-label">85</span></label><br>
+          <input type="range" id="quality" name="quality" min="1" max="100" value="85"><br><br>
+        </div>
+      </div>
       <button type="submit">upload</button>
     </form>
+    <script>
+      const mediaFile = document.getElementById('media-file');
+      const convertRow = document.getElementById('convert-row');
+      const convertSelect = document.getElementById('convert-select');
+      const qualityRow = document.getElementById('quality-row');
+      const qualityInput = document.getElementById('quality');
+      const qualityLabel = document.getElementById('quality-label');
+
+      mediaFile.addEventListener('change', () => {
+        const isImage = mediaFile.files[0]?.type.startsWith('image/');
+        convertRow.style.display = isImage ? 'block' : 'none';
+        if (!isImage) convertSelect.value = 'leave';
+      });
+
+      convertSelect.addEventListener('change', () => {
+        qualityRow.style.display = convertSelect.value === 'jpg' ? 'block' : 'none';
+      });
+
+      qualityInput.addEventListener('input', () => {
+        qualityLabel.textContent = qualityInput.value;
+      });
+    </script>
 
     <hr>
 

@@ -1,8 +1,10 @@
 const path = require("path");
 const fs = require("fs/promises");
 const multer = require("multer");
+const sharp = require("sharp");
 
 const IMAGE_EXTS = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"]);
+const CONVERTIBLE_EXTS = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp"]);
 const ALLOWED_EXTS = new Set([
 	".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg",
 	".mp4", ".webm",
@@ -47,6 +49,20 @@ async function listFiles() {
 	}
 }
 
+async function convertToJpeg(filePath, quality) {
+	const ext = path.extname(filePath).toLowerCase();
+	if (!CONVERTIBLE_EXTS.has(ext)) return path.basename(filePath);
+
+	const dir = path.dirname(filePath);
+	const base = path.basename(filePath, ext);
+	const outPath = path.join(dir, base + ".jpg");
+
+	await sharp(filePath).jpeg({ quality }).toFile(outPath);
+
+	if (filePath !== outPath) await fs.unlink(filePath);
+	return base + ".jpg";
+}
+
 async function deleteFile(filename) {
 	const filePath = path.join(process.env.MEDIA_DIRECTORY, filename);
 	try {
@@ -56,4 +72,4 @@ async function deleteFile(filename) {
 	}
 }
 
-module.exports = { upload, listFiles, deleteFile };
+module.exports = { upload, listFiles, deleteFile, convertToJpeg };
